@@ -6,6 +6,14 @@
 
 #include<functional>
 
+#include <muduo/net/Buffer.h>
+#include <muduo/net/TcpConnection.h>
+
+#include <boost/function.hpp>
+#include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
+
+#include <google/protobuf/message.h>
 
 /*
 ProtobufCodec负责decode和encode：
@@ -44,8 +52,8 @@ public:
   typedef boost::function<void ()> ProtobufMessageCallback;
   typedef boost::function<void ()> ErrorCallback;
   
-  typedef std::function<void ()> ProtobufMessageCallback;
-  typedef std::function<void ()> ErrorCallback;
+  //typedef std::function<void ()> ProtobufMessageCallback;
+  //typedef std::function<void ()> ErrorCallback;
 
   explicit ProtobufCodec(const ProtobufMessageCallback& messageCb)
     : messageCallback_(messageCb),
@@ -65,18 +73,30 @@ public:
 
   void send(const muduo::net::TcpConnection& conn, const google::protobuf::Message& message)
   {
-
+	//encode 并发送
+	muduo::net::Buffer buf;
+	fillEmptyBuffer(&buf, message);
+	conn->send(&buf);
   }
 
+	  static const muduo::string& errorCodeToString(ErrorCode errorCode);
+	  static void fillEmptyBuffer(muduo::net::Buffer* buf, const google::protobuf::Message& message);
+	  static google::protobuf::Message* createMessage(const std::string& type_name);
+	  static MessagePtr parse(const char* buf, int len, ErrorCode* errorCode);
 
 
 private:
+
+  static void defaultErrorCallback(const muduo::net::TcpConnectionPtr&,
+                                   muduo::net::Buffer*,
+                                   muduo::Timestamp,
+                                   ErrorCode);
 
 	ProtobufMessageCallback messageCallback_;
 	ErrorCallback errorCallback_;
 
   const static int kHeaderLen = sizeof(int32_t);
-  const static int kMinMessageLen = 2*kHeaderLen + 2; // nameLen + typeName + checkSum
+  const static int kMinMessageLen = 2*kHeaderLen + 2; // nameLen + typeName(至少2字节) + checkSum
   const static int kMaxMessageLen = 64*1024*1024; // same as codec_stream.h kDefaultTotalBytesLimit
 };
 
