@@ -16,11 +16,11 @@
 typedef boost::shared_ptr<google::protobuf::Message> MessagePtr;
 
 //ProtobufCodec decode Buffer获得Message后，根据Message类型，调用不同的函数
-class ProtobufDispatcher : boost::noncopyable{
+class ProtobufDispatcherLite : boost::noncopyable{
 public:
-	typedef boost::function<void (const muduo::net::TcpConnnectionPtr&, const MessagePtr&, muduo::Timestamp)> ProtobufMessageCallback;
+	typedef boost::function<void (const muduo::net::TcpConnectionPtr&, const MessagePtr&, muduo::Timestamp)> ProtobufMessageCallback;
 
-	ProtobufDispatcher(const ProtobufMessageCallback& defaultCb)
+	ProtobufDispatcherLite(const ProtobufMessageCallback& defaultCb)
 	:defaultCallback_(defaultCb)
 	{}
 
@@ -29,10 +29,10 @@ public:
 		callbacks_[desc]=callback;
 	}
 
-	void OnProtobufMessage(const muduo::net::TcpConnnectionPtr& conn, const MessagePtr& message, muduo::Timestamp receiveTime) const
+	void onProtobufMessage(const muduo::net::TcpConnectionPtr& conn, const MessagePtr& message, muduo::Timestamp receiveTime) const
 	{
-		Descriptor* desc=message->GetDescriptor();
-		CallbackMap::iterator it=callbacks_.find(desc);
+		const google::protobuf::Descriptor* desc=message->GetDescriptor();
+		CallbackMap::const_iterator it=callbacks_.find(desc); // 所指东西不可被改动
 		if(it!=callbacks_.end())
 		{
 			it->second(conn, message, receiveTime);
