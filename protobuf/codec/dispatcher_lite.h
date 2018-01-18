@@ -19,7 +19,8 @@ typedef boost::shared_ptr<google::protobuf::Message> MessagePtr;
 class ProtobufDispatcherLite : boost::noncopyable{
 public:
 	typedef boost::function<void (const muduo::net::TcpConnectionPtr&, const MessagePtr&, muduo::Timestamp)> ProtobufMessageCallback;
-
+	// 要求注册的函数都是 ProtobufMessageCallback 类型的函数，这样的函数需要自己 对MessagePtr做转型
+	
 	ProtobufDispatcherLite(const ProtobufMessageCallback& defaultCb)
 	:defaultCallback_(defaultCb)
 	{}
