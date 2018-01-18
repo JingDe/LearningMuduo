@@ -99,6 +99,7 @@ int32_t asInt32(const char* buf)
 {
   int32_t be32 = 0;
   ::memcpy(&be32, buf, sizeof(be32));
+  
   return sockets::networkToHost32(be32);
 }
 
@@ -155,6 +156,7 @@ google::protobuf::Message* ProtobufCodec::createMessage(const std::string& typeN
 }
 
 //decode函数
+// [buf, buf+len] 去除了 总长度len 消息
 MessagePtr ProtobufCodec::parse(const char* buf, int len, ErrorCode* error)
 {
   MessagePtr message;
@@ -168,7 +170,7 @@ MessagePtr ProtobufCodec::parse(const char* buf, int len, ErrorCode* error)
   if (checkSum == expectedCheckSum)
   {
     // get message type name
-    int32_t nameLen = asInt32(buf);
+    int32_t nameLen = asInt32(buf); // networkToHost32
     if (nameLen >= 2 && nameLen <= len - 2*kHeaderLen)
     {
       std::string typeName(buf + kHeaderLen, buf + kHeaderLen + nameLen - 1);
@@ -195,7 +197,8 @@ MessagePtr ProtobufCodec::parse(const char* buf, int len, ErrorCode* error)
     }
     else 
     {
-      *error = kInvalidNameLen;
+		fprintf(stdout, "nameLen=%d\n", nameLen);
+        *error = kInvalidNameLen;
 		if(nameLen <2)
 			fprintf(stdout, "SHORT\n");
 		else if(nameLen > len-2*kHeaderLen)
