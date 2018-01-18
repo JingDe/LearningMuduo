@@ -145,6 +145,7 @@ void testBadBuffer()
     string data(buf.peek(), len);
     ProtobufCodec::ErrorCode errorCode = ProtobufCodec::kNoError;
     data[3] = 0; // 
+	fprintf(stdout, "data[3]=0:\n");
 //	低字节data[0] data[1] data[2] data[3]
     redoCheckSum(data, len);
     MessagePtr message = ProtobufCodec::parse(data.c_str(), len, &errorCode);
@@ -156,6 +157,7 @@ void testBadBuffer()
     string data(buf.peek(), len);
     ProtobufCodec::ErrorCode errorCode = ProtobufCodec::kNoError;
     data[3] = 100;
+	fprintf(stdout, "data[3]=100:\n");
     redoCheckSum(data, len);
     MessagePtr message = ProtobufCodec::parse(data.c_str(), len, &errorCode);
     assert(message == NULL);
@@ -185,7 +187,57 @@ void testBadBuffer()
 
 }
 
+int g_count = 0;
 
+void onMessage(const muduo::net::TcpConnectionPtr& conn,
+               const MessagePtr& message,
+               muduo::Timestamp receiveTime)
+{
+  g_count++;
+}
+
+void testOnMessage()
+{
+  muduo::Query query;
+  query.set_id(1);
+  query.set_questioner("Chen Shuo");
+  query.add_question("Running?");
+
+  Buffer buf1;
+  ProtobufCodec::fillEmptyBuffer(&buf1, query);
+
+  muduo::Empty empty;
+  empty.set_id(43);
+  empty.set_id(1982);
+
+  Buffer buf2;
+  ProtobufCodec::fillEmptyBuffer(&buf2, empty);
+
+  size_t totalLen = buf1.readableBytes() + buf2.readableBytes();
+  Buffer all;
+  all.append(buf1.peek(), buf1.readableBytes());
+  all.append(buf2.peek(), buf2.readableBytes());
+  assert(all.readableBytes() == totalLen);
+  muduo::net::TcpConnectionPtr conn;
+  muduo::Timestamp t;
+  ProtobufCodec codec(onMessage);
+  for (size_t len = 0; len <= totalLen; ++len)
+  {
+    Buffer input;
+    input.append(all.peek(), len);
+
+    g_count = 0;
+    codec.onMessage(conn, &input, t);
+    int expected = len < buf1.readableBytes() ? 0 : 1;
+    if (len == totalLen) expected = 2;
+    assert(g_count == expected); (void) expected;
+    // printf("%2zd %d\n", len, g_count);
+
+    input.append(all.peek() + len, totalLen - len);
+    codec.onMessage(conn, &input, t);
+    assert(g_count == 2);
+  }
+}
 
 
 int main()
@@ -200,7 +252,7 @@ int main()
   puts("");
   testBadBuffer();
   puts("");
-  //testOnMessage();
+  testOnMessage();
   puts("");
 
   puts("All pass!!!");
