@@ -4,7 +4,7 @@
 #ifndef PROTOBUF_CODEC_H
 #define PROTOBUF_CODEC_H
 
-#include<functional>
+//#include<functional>
 
 #include <muduo/net/Buffer.h>
 #include <muduo/net/TcpConnection.h>
@@ -33,7 +33,7 @@ ProtobufCodec负责encode，调用TcpConnection::send()
 // }
 
 
-typedef boost::shared_ptr<google::protobuf::Message> MesagePtr;
+typedef boost::shared_ptr<google::protobuf::Message> MessagePtr;
 
 
 
@@ -49,8 +49,8 @@ public:
     kParseError,
   };
 
-  typedef boost::function<void ()> ProtobufMessageCallback;
-  typedef boost::function<void ()> ErrorCallback;
+  typedef boost::function<void (const muduo::net::TcpConnectionPtr&, const MessagePtr&, muduo::Timestamp)> ProtobufMessageCallback;
+  typedef boost::function<void (const muduo::net::TcpConnectionPtr&, muduo::net::Buffer*, muduo::Timestamp, ErrorCode)> ErrorCallback;
   
   //typedef std::function<void ()> ProtobufMessageCallback;
   //typedef std::function<void ()> ErrorCallback;
@@ -71,7 +71,7 @@ public:
   				muduo::net::Buffer* buf, 
   				muduo::Timestamp receiveTime);//对Buffer类型参数decode
 
-  void send(const muduo::net::TcpConnection& conn, const google::protobuf::Message& message)
+  void send(const muduo::net::TcpConnectionPtr& conn, const google::protobuf::Message& message)
   {
 	//encode 并发送
 	muduo::net::Buffer buf;

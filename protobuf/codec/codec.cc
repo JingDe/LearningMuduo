@@ -1,6 +1,6 @@
 
 #include"codec.h"
-
+#include<cstdio>
 #include<muduo/base/Logging.h>
 #include<muduo/net/Endian.h>
 #include<muduo/net/protorpc/google-inl.h>
@@ -9,8 +9,10 @@
 
 #include<zlib.h>
 
+using namespace muduo;
+using namespace muduo::net;
 
-void ProtobufCodec::fillEmptyBuffer(Buffer* buf, const google::protobuf::Message& message)
+void ProtobufCodec::fillEmptyBuffer(muduo::net::Buffer* buf, const google::protobuf::Message& message)
 {
   // buf->retrieveAll();
   assert(buf->readableBytes() == 0);
@@ -47,17 +49,17 @@ void ProtobufCodec::fillEmptyBuffer(Buffer* buf, const google::protobuf::Message
 
 namespace
 {
-  const string kNoErrorStr = "NoError";
-  const string kInvalidLengthStr = "InvalidLength";
-  const string kCheckSumErrorStr = "CheckSumError";
-  const string kInvalidNameLenStr = "InvalidNameLen";
-  const string kUnknownMessageTypeStr = "UnknownMessageType";
-  const string kParseErrorStr = "ParseError";
-  const string kUnknownErrorStr = "UnknownError";
+  const muduo::string kNoErrorStr = "NoError";
+  const muduo::string kInvalidLengthStr = "InvalidLength";
+  const muduo::string kCheckSumErrorStr = "CheckSumError";
+  const muduo::string kInvalidNameLenStr = "InvalidNameLen";
+  const muduo::string kUnknownMessageTypeStr = "UnknownMessageType";
+  const muduo::string kParseErrorStr = "ParseError";
+  const muduo::string kUnknownErrorStr = "UnknownError";
 }
 
 
-const string& ProtobufCodec::errorCodeToString(ErrorCode errorCode)
+const muduo::string& ProtobufCodec::errorCodeToString(ErrorCode errorCode)
 {
   switch (errorCode)
   {
