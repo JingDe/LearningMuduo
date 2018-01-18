@@ -1,5 +1,26 @@
+#include "codec.h"
+#include "dispatcher.h"
+#include "query.pb.h"
 
-class QueryServer: boost::noncopyable{
+#include <muduo/base/Logging.h>
+#include <muduo/base/Mutex.h>
+#include <muduo/net/EventLoop.h>
+#include <muduo/net/TcpServer.h>
+
+#include <boost/bind.hpp>
+
+#include <stdio.h>
+#include <unistd.h>
+
+using namespace muduo;
+using namespace muduo::net;
+
+typedef boost::shared_ptr<muduo::Query> QueryPtr;
+typedef boost::shared_ptr<muduo::Answer> AnswerPtr;
+
+
+class QueryServer: boost::noncopyable
+{
 public:
 	QueryServer(EventLoop* loop, const InetAddress& listenAddr)
 	:server_(loop, listenAddr, "QueryServer"),
@@ -66,3 +87,23 @@ private:
 	ProtobufDispatcher dispatcher_;
 	ProtobufCodec codec_;
 };
+
+
+int main(int argc, char* argv[])
+{
+  LOG_INFO << "pid = " << getpid();
+  if (argc > 1)
+  {
+    EventLoop loop;
+    uint16_t port = static_cast<uint16_t>(atoi(argv[1]));
+    InetAddress serverAddr(port);
+    QueryServer server(&loop, serverAddr);
+    server.start();
+    loop.loop();
+  }
+  else
+  {
+    printf("Usage: %s port\n", argv[0]);
+  }
+}
+
