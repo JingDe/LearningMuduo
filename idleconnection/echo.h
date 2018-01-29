@@ -5,8 +5,8 @@
 //#include <muduo/base/Types.h>
 
 #include <boost/circular_buffer.hpp>
-//#include <boost/unordered_set.hpp>
-#include<unordered_set>
+#include <boost/unordered_set.hpp>
+//#include<unordered_set>
 #include <boost/version.hpp>
 //#include<memory>
 
@@ -65,7 +65,7 @@ class EchoServer
 private:
 	typedef boost::shared_ptr<Entry> EntryPtr;
 	typedef boost::weak_ptr<Entry> WeakEntryPtr;
-	typedef std::unordered_set<EntryPtr> Bucket;
+	typedef boost::unordered_set<EntryPtr> Bucket;
 	typedef boost::circular_buffer<Bucket> WeakConnectionList;
 	
 	WeakConnectionList connectionBuckets_;
