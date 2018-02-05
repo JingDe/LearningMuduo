@@ -4,6 +4,7 @@
 
 #include<pthread.h>
 #include<assert.h>
+#include<stdio.h>
 
 template<typename T>
 class ThreadLocalSingleton{
@@ -49,9 +50,5 @@ private:
 
 template<typename T>
 pthread_key_t ThreadLocalSingleton<T>::pkey_;
-
-// 进程主线程A： ThreadLocalSingleton tls;  T t1=tls.instance();
-
-// 线程B：T t2=tls.instance();
 
 #endif

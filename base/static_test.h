@@ -1,29 +1,28 @@
-
-#ifndef MUDUO_BASE_THREADLOCALSINGLETON_H
-#define MUDUO_BASE_THREADLOCALSINGLETON_H
+#ifndef STATIC_TEST_H
+#define STATIC_TEST_H
 
 #include <assert.h>
 #include <pthread.h>
 #include<stdio.h>
 
-template<typename T>
+
 class ThreadLocalSingleton 
 {
  public:
 
-  static T& instance()
+  static int& instance()
   {
     if (!t_value_)
     {
       printf("instance()\n");
-      t_value_ = new T();
+      t_value_ = new int();
       deleter_.set(t_value_);
     }
     printf("return\n");
     return *t_value_;
   }
 
-  static T* pointer()
+  static int* pointer()
   {
     return t_value_;
   }
@@ -36,7 +35,7 @@ class ThreadLocalSingleton
   {
     printf("destructor\n");
    // std::assert(obj == t_value_);
-    typedef char T_must_be_complete_type[sizeof(T) == 0 ? -1 : 1];
+    typedef char T_must_be_complete_type[sizeof(int) == 0 ? -1 : 1];
     T_must_be_complete_type dummy; (void) dummy;
     delete t_value_;
     t_value_ = 0;
@@ -57,9 +56,10 @@ class ThreadLocalSingleton
       pthread_key_delete(pkey_);
     }
 
-    void set(T* newObj)
+    void set(int* newObj)
     {
       printf("set\n");
+      printf("this=&p\n", this);
       //std::assert(pthread_getspecific(pkey_) == NULL);
       pthread_setspecific(pkey_, newObj);
     }
@@ -67,15 +67,14 @@ class ThreadLocalSingleton
     pthread_key_t pkey_;
   };
 
-  static __thread T* t_value_;
+  static __thread int* t_value_;
   static Deleter deleter_;
 };
 
-template<typename T>
-__thread T* ThreadLocalSingleton<T>::t_value_ = 0;
 
-template<typename T>
-typename ThreadLocalSingleton<T>::Deleter ThreadLocalSingleton<T>::deleter_;
+__thread int* ThreadLocalSingleton::t_value_ = 0;
+
+ThreadLocalSingleton::Deleter ThreadLocalSingleton::deleter_;
 
 
 #endif
