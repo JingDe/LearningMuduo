@@ -1,5 +1,5 @@
 
-#include "ThreadLocalSingleton3.h"
+#include "ThreadLocalSingleton.h"
 #include<stdio.h>
 #include<pthread.h>
 #include<unistd.h>
@@ -34,17 +34,19 @@ void* routine(void *arg)
 	t1=3;
 	printf("%d %d %d %f\n", gettid(), t1, t2, t3);
 	
-	return (void*)0; // NULL;
+	return (void*)0; 
 }
 
 int main()
 {
-	pthread_t pt1;
+	pthread_t pt[2];
+	int len=sizeof(pt)/sizeof(pthread_t);
 	routine(NULL);
 	
+	for(int i=0; i<len; i++)
+		pthread_Call("create thread1", pthread_create(&pt[i], NULL, routine, NULL));
 	
-	pthread_Call("create thread1", pthread_create(&pt1, NULL, routine, NULL));
-	
-	pthread_join(pt1, NULL);	
+	for(int i=0; i<len; i++)
+		pthread_join(pt[i], NULL);	
 	return 0;
 }

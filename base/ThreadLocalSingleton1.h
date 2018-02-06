@@ -18,7 +18,7 @@ public:
 		{
 			std::cout<<gettid()<<", instance()\n";
 			t_value_=new T();	
-			deleter_.set(t_value_);		
+			
 		}
 		return *t_value_;
 	}
@@ -38,26 +38,26 @@ public:
     }
 
 
-	/*class Deleter2{
+	class Deleter2{
 	public:
 		Deleter2()
 		{
-			//printf("%d: Deleter\n", gettid());
-			std::cout<<ThreadLocalSingleton::gettid()<<", Deleter2()\n";
+			printf("%d, Deleter2=%p\n", ThreadLocalSingleton::gettid(), this);
 		}
 		~Deleter2()
 		{
-			//printf("%d: ~Deleter\n", gettid());			
-			std::cout<<ThreadLocalSingleton::gettid()<<", ~Deleter2()\n";
+			printf("%d, ~Deleter2=%p\n", ThreadLocalSingleton::gettid(), this);
 			if(ThreadLocalSingleton::t_value_)
 			{
 				delete ThreadLocalSingleton::t_value_;
 			}
 			ThreadLocalSingleton::t_value_=0;
 		}
-	};*/
+
+		bool dummy;
+	};
 	
-  class Deleter
+  /*class Deleter
   {
    public:
     Deleter()
@@ -79,14 +79,14 @@ public:
     }
 
     pthread_key_t pkey_;
-  };
+  };*/
 
 	
 private:
 	static __thread T* t_value_; 
 
-	static Deleter deleter_; // 进程下所有线程共有
-	
+	static Deleter2 deleter2_; // 进程下所有线程共有
+
 
 	ThreadLocalSingleton(const ThreadLocalSingleton&);
 	void operator=(const ThreadLocalSingleton&);
@@ -94,6 +94,6 @@ private:
 template<typename T>
 __thread T* ThreadLocalSingleton<T>::t_value_=0;
 template<typename T>
-typename ThreadLocalSingleton<T>::Deleter ThreadLocalSingleton<T>::deleter_;
+typename ThreadLocalSingleton<T>::Deleter2 ThreadLocalSingleton<T>::deleter2_;
 
 #endif

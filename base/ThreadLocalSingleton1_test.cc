@@ -1,4 +1,5 @@
-#include"static_test.h"
+
+#include "ThreadLocalSingleton1.h"
 #include<stdio.h>
 #include<pthread.h>
 #include<unistd.h>
@@ -20,22 +21,20 @@ pid_t gettid()
 	return static_cast<pid_t>(syscall(SYS_gettid));
 }
 
-
-
 void* routine(void *arg)
 {
-	int& t1=ThreadLocalSingleton::instance();
+	int& t1=ThreadLocalSingleton<int>::instance();
 	
-	int& t2=ThreadLocalSingleton::instance();
+	int& t2=ThreadLocalSingleton<int>::instance();
 	
+	double& t3=ThreadLocalSingleton<double>::instance();
 	
-	
-	printf("%d %p %p\n", gettid(), &t1, &t2);
-	printf("%d %d %d\n", gettid(), t1, t2);
+	printf("%d %p %p %p\n", gettid(), &t1, &t2, &t3);
+	printf("%d %d %d %f\n", gettid(), t1, t2, t3);
 	t1=3;
-	printf("%d %d %d\n", gettid(), t1, t2);
+	printf("%d %d %d %f\n", gettid(), t1, t2, t3);
 	
-	return (void*)0; // NULL;
+	return (void*)0; 
 }
 
 int main()
