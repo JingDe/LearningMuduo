@@ -1,4 +1,5 @@
-
+#ifndef NONCOPYABLE_H_
+#define NONCOPYABLE_H_
 // 私有的拷贝构造和拷贝赋值，阻止noncopyable被拷贝
 // 所有继承noncopyable的类，由于派生类不能访问noncopyable的拷贝构造和拷贝赋值，
 // 编译器不能自动生成拷贝构造和拷贝赋值
@@ -22,3 +23,4 @@ private:
 // 以上对三种继承方式都一样
 
 
+#endif

@@ -1,3 +1,11 @@
+#ifndef FIXEDBUFFER_H_
+#define FIXEDBUFFER_H_
+
+#include"noncopyable.h"
+
+#include<string>
+#include<cstring>  // memcpy
+#include<strings.h>
 
 template<int SIZE>
 class FixedBuffer : noncopyable
@@ -6,7 +14,7 @@ public:
 	FixedBuffer():cur_(data_) {}
 	~FixedBuffer()
 	{
-		delete data_;
+		// delete data_;
 	}
 	
 	bool empty(){ return cur_==data_; }
@@ -34,12 +42,12 @@ public:
 		/*for(int i=0; i<len; i++)
 			*(cur_++)=str[i];*/
 		memcpy(cur_, str, len);
-		cur += len;
+		cur_ += len;
 	}
 	
 	void append(const char* buf, size_t len)
 	{
-		if(len > implicit_cast<size_t>(available()) )
+		if(len > static_cast<size_t>(available()) )
 		{
 			memcpy(cur_, buf, len);
 			cur_ += len;
@@ -47,9 +55,13 @@ public:
 	}
 	
 	void reset() { cur_=data_; }
-	void bzero() { ::bzero(data_, sizeof(data_)); }
+	void bzero() {
+		//::bzero(data_, sizeof(data_)); // bzero函数，strings.h头文件，POSIX标准
+		memcpy(data_, 0, sizeof(data_));
+	}
 	
-	std::string ToString(){ return string(data_, size()); }
+	
+	std::string ToString(){ return std::string(data_, size()); }
 	
 	const char* debugString();
 	
@@ -60,4 +72,4 @@ private:
 	char* cur_;
 };
 
-
+#endif
