@@ -47,7 +47,7 @@ public:
 	
 	void append(const char* buf, size_t len)
 	{
-		if(len > static_cast<size_t>(available()) )
+		if(len < static_cast<size_t>(available()) )
 		{
 			memcpy(cur_, buf, len);
 			cur_ += len;
