@@ -21,6 +21,8 @@ public:
 		}
 		requests_.erase(req);
 	}
+	
+	void printAll() const;
 
 private:
 	mutable muduo::MutexLock mutex_;
